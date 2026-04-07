@@ -1,0 +1,1 @@
+# Chicken Tinder\n\nSwipe-based restaurant matching app for couples.\n\n> Ok, so hear me out. An app, right? It's like Tinder. But you and your significant other both have accounts. Y'all open it at the same time and swipe left or right on restaurants within a radius that you determine. After y'all match, that's where you have dinner.
