@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserId } from '@/lib/utils';
-import { ChefHat, Users, ArrowRight, Sparkles } from 'lucide-react';
+import { ChefHat, Users, ArrowRight, Sparkles, Crown } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -24,6 +24,10 @@ export default function Home() {
         body: JSON.stringify({ action: 'create', hostId: userId }),
       });
       const data = await res.json();
+      if (data.error === 'daily_limit') {
+        router.push('/pro');
+        return;
+      }
       if (data.session) {
         const restRes = await fetch(`/api/restaurants?lat=${data.session.lat}&lng=${data.session.lng}&radius=${data.session.radius}`);
         const restData = await restRes.json();
@@ -107,7 +111,16 @@ export default function Home() {
             Join a Session
           </button>
 
-          <div className="pt-8 text-center">
+          {/* Pro upsell */}
+          <button
+            onClick={() => router.push('/pro')}
+            className="w-full py-3 px-4 border border-[var(--ct-accent)]/30 rounded-2xl flex items-center justify-center gap-2
+                       text-sm text-[var(--ct-accent)] hover:bg-[var(--ct-accent)]/5 transition-colors"
+          >
+            <Crown size={16} /> Upgrade to Pro - $1.99/mo
+          </button>
+
+          <div className="pt-6 text-center">
             <p className="text-[var(--ct-text-dim)] text-sm mb-4 font-medium uppercase tracking-wider">How it works</p>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>

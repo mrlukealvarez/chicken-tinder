@@ -9,6 +9,7 @@ import {
   getUserSwipeCount,
   completeSession,
 } from '@/lib/session-store';
+import { canCreateSession, incrementUsage } from '@/lib/usage-store';
 import { generateRoomCode } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
@@ -18,9 +19,18 @@ export async function POST(request: NextRequest) {
   switch (action) {
     case 'create': {
       const { hostId, lat, lng, radius } = body;
+      const usage = canCreateSession(hostId);
+      if (!usage.allowed) {
+        return NextResponse.json({
+          error: 'daily_limit',
+          remaining: 0,
+          isPro: false,
+        }, { status: 429 });
+      }
       const code = generateRoomCode();
       const session = createSession(code, hostId, lat || 43.7666, lng || -103.5988, radius || 5000);
-      return NextResponse.json({ session });
+      incrementUsage(hostId);
+      return NextResponse.json({ session, remaining: usage.remaining - 1, isPro: usage.isPro });
     }
 
     case 'join': {
