@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+  --ct-bg: #0f0f1a;
+  --ct-surface: #1a1a2e;
+  --ct-primary: #00d4aa;
+  --ct-primary-glow: #00d4aa33;
+  --ct-secondary: #ff6b6b;
+  --ct-accent: #ffd93d;
+  --ct-text: #f0f0f0;
+  --ct-text-dim: #8888aa;
+  --ct-card: #222240;
+  --ct-border: #333355;
+}
+
+@theme inline {
+  --color-background: var(--ct-bg);
+  --color-foreground: var(--ct-text);
+  --color-primary: var(--ct-primary);
+  --color-secondary: var(--ct-secondary);
+  --color-accent: var(--ct-accent);
+  --color-surface: var(--ct-surface);
+  --color-card: var(--ct-card);
+  --color-dim: var(--ct-text-dim);
+  --color-border: var(--ct-border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--ct-bg);
+  color: var(--ct-text);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+/* Swipe card animations */
+.swipe-card {
+  touch-action: none;
+  user-select: none;
+}
+
+.card-gradient {
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 60%);
+}
+
+/* Pulse animation for waiting state */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--ct-primary-glow); }
+  50% { box-shadow: 0 0 40px var(--ct-primary-glow), 0 0 60px var(--ct-primary-glow); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Match celebration */
+@keyframes match-pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.match-pop {
+  animation: match-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Confetti particle */
+@keyframes confetti-fall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti {
+  animation: confetti-fall 3s ease-in forwards;
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(figma-developer-mcp --figma-api-key '$FIGMA_ACCESS_TOKEN')",
+      "Bash(kill %1)",
+      "Bash(figma-developer-mcp --help)",
+      "Bash(sudo chown:*)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(bunx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack)",
+      "Bash(npx next:*)"
+    ]
+  }
+}
