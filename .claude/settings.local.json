@@ -8,7 +8,14 @@
       "Bash(sudo chown:*)",
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
       "Bash(bunx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(vercel tokens:*)",
+      "Bash(vercel --version)",
+      "Bash(rm -f /Users/luke/.playwright-profile/SingletonLock /Users/luke/.playwright-profile/SingletonCookie /Users/luke/.playwright-profile/SingletonSocket)",
+      "Bash(killall -9 Chromium)",
+      "Bash(killall -9 \"Google Chrome\")",
+      "WebFetch(domain:fonts.googleapis.com)",
+      "Bash(npx vercel:*)"
     ]
   }
 }

@@ -20,7 +20,14 @@ export default function InstallPrompt() {
 
     const handler = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      // Only show install prompt after user has completed at least one session
+      const hasUsedApp = localStorage.getItem('ct-sessions-completed');
+      if (hasUsedApp) {
+        setDeferredPrompt(e as BeforeInstallPromptEvent);
+      } else {
+        // Store for later retrieval after first session
+        (window as unknown as Record<string, Event>).__deferredInstallPrompt = e;
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -39,7 +46,7 @@ export default function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 animate-[slide-up_0.3s_ease-out]">
+    <div className="fixed bottom-4 left-4 right-4 z-50 pb-safe animate-[slide-up_0.3s_ease-out]">
       <div className="bg-[var(--ct-surface)] border border-[var(--ct-border)] rounded-2xl p-4 flex items-center gap-3 shadow-lg">
         <div className="w-10 h-10 rounded-xl bg-[var(--ct-primary)] flex items-center justify-center shrink-0">
           <Download size={20} className="text-[var(--ct-bg)]" />
@@ -54,7 +61,7 @@ export default function InstallPrompt() {
         >
           Install
         </button>
-        <button onClick={() => setDismissed(true)} className="text-[var(--ct-text-dim)] shrink-0">
+        <button onClick={() => setDismissed(true)} className="text-[var(--ct-text-dim)] shrink-0 w-11 h-11 flex items-center justify-center -mr-1">
           <X size={18} />
         </button>
       </div>

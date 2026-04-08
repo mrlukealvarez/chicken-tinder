@@ -12,6 +12,8 @@ import {
 import { canCreateSession, incrementUsage } from '@/lib/usage-store';
 import { generateRoomCode } from '@/lib/utils';
 
+export const preferredRegion = 'iad1';
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { action } = body;

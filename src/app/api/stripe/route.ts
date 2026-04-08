@@ -16,6 +16,8 @@ async function stripeRequest(endpoint: string, body: Record<string, string>) {
   return res.json();
 }
 
+export const preferredRegion = 'iad1';
+
 export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action');

@@ -22,6 +22,9 @@ export default function SessionPage() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [swipedCount, setSwipedCount] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState<string | null>(null);
+  const [connectionLost, setConnectionLost] = useState(false);
+  const failCountRef = useRef(0);
   const cardRefs = useRef<Array<{ swipe: (dir: string) => Promise<void>; restoreCard: () => Promise<void> } | null>>([]);
 
   const fetchSession = useCallback(async () => {
@@ -34,12 +37,15 @@ export default function SessionPage() {
       const data = await res.json();
       if (data.session) {
         setSession(data.session);
+        failCountRef.current = 0;
+        setConnectionLost(false);
         if (currentIndex === -1 && data.session.restaurants.length > 0) {
           setCurrentIndex(data.session.restaurants.length - 1);
         }
       }
     } catch {
-      // silent retry
+      failCountRef.current++;
+      if (failCountRef.current >= 3) setConnectionLost(true);
     }
     setLoading(false);
   }, [code, currentIndex]);
@@ -65,6 +71,8 @@ export default function SessionPage() {
       }),
     });
 
+    // Haptic feedback on swipe
+    navigator?.vibrate?.(10);
     setSwipedCount(prev => prev + 1);
     setCurrentIndex(prev => prev - 1);
   }
@@ -105,9 +113,18 @@ export default function SessionPage() {
 
   if (!session) {
     return (
-      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <p className="text-[var(--ct-secondary)] mb-4">Session not found</p>
-        <button onClick={() => router.push('/')} className="text-[var(--ct-primary)]">Go home</button>
+      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center page-enter">
+        <div className="w-16 h-16 rounded-2xl bg-[var(--ct-surface)] flex items-center justify-center mb-4">
+          <ChefHat size={32} className="text-[var(--ct-secondary)]" />
+        </div>
+        <h2 className="text-xl font-bold mb-2">Session not found</h2>
+        <p className="text-[var(--ct-text-dim)] mb-6">This room may have expired or the code is wrong.</p>
+        <button
+          onClick={() => router.push('/')}
+          className="px-6 py-3 bg-[var(--ct-primary)] text-[var(--ct-bg)] rounded-xl font-bold transition-all active:scale-[0.98]"
+        >
+          Start Over
+        </button>
       </main>
     );
   }
@@ -181,22 +198,33 @@ export default function SessionPage() {
         </div>
       </div>
 
+      {/* Connection lost banner */}
+      {connectionLost && (
+        <div className="mx-4 mt-2 px-3 py-2 bg-[var(--ct-secondary)]/10 border border-[var(--ct-secondary)]/30 rounded-xl text-center text-sm text-[var(--ct-secondary)] animate-pulse shrink-0">
+          Reconnecting...
+        </div>
+      )}
+
       {/* Card stack */}
       <div className="flex-1 relative mx-4 my-4">
-        {restaurants.map((restaurant, index) => (
-          <TinderCard
+        {restaurants.map((restaurant, index) => {
+          // Only render cards near the current index (perf: avoids 20+ images loading)
+          if (index > currentIndex + 1 || index < currentIndex - 1) return null;
+          return (<TinderCard
             ref={(el) => { cardRefs.current[index] = el as typeof cardRefs.current[0]; }}
             key={restaurant.id}
-            onSwipe={(dir) => handleSwipe(dir as SwipeDirection, restaurant)}
+            onSwipe={(dir) => { setSwipeDirection(null); handleSwipe(dir as SwipeDirection, restaurant); }}
             onCardLeftScreen={handleCardLeftScreen}
+            onSwipeRequirementFulfilled={(dir) => setSwipeDirection(dir)}
+            onSwipeRequirementUnfulfilled={() => setSwipeDirection(null)}
             preventSwipe={['up', 'down']}
             swipeRequirementType="position"
             swipeThreshold={100}
             className={`absolute inset-0 ${index === currentIndex ? 'z-10' : index === currentIndex - 1 ? 'z-0' : 'z-[-1]'}`}
           >
-            <SwipeCard restaurant={restaurant} />
-          </TinderCard>
-        ))}
+            <SwipeCard restaurant={restaurant} swipeDirection={index === currentIndex ? swipeDirection : null} />
+          </TinderCard>);
+        })}
 
         {currentIndex < 0 && (
           <div className="absolute inset-0 flex items-center justify-center text-center">

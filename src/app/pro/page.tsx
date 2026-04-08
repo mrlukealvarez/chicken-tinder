@@ -17,9 +17,11 @@ function ProContent() {
   const searchParams = useSearchParams();
   const cancelled = searchParams.get('cancelled');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   async function handleUpgrade() {
     setLoading(true);
+    setError('');
     try {
       const userId = getUserId();
       const res = await fetch('/api/stripe?action=checkout', {
@@ -34,11 +36,11 @@ function ProContent() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Stripe not configured yet. Coming soon!');
+        setError(data.error || 'Stripe not configured yet. Coming soon!');
         setLoading(false);
       }
     } catch {
-      alert('Something went wrong. Try again.');
+      setError('Something went wrong. Try again.');
       setLoading(false);
     }
   }
@@ -113,6 +115,9 @@ function ProContent() {
               </>
             )}
           </button>
+          {error && (
+            <p className="text-[var(--ct-secondary)] text-sm text-center mt-3">{error}</p>
+          )}
           <p className="text-xs text-[var(--ct-text-dim)] mt-3">
             Cancel anytime. No commitment.
           </p>

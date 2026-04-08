@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getUserId, priceToSymbol } from '@/lib/utils';
 import { Match, Session } from '@/types';
@@ -16,48 +16,77 @@ export default function ResultsPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [waitingForPartner, setWaitingForPartner] = useState(false);
+  const confettiShownRef = useRef(false);
+
+  const loadResults = useCallback(async () => {
+    const userId = getUserId();
+    // Get session
+    const sessionRes = await fetch('/api/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get', code }),
+    });
+    const sessionData = await sessionRes.json();
+    if (!sessionData.session) {
+      setLoading(false);
+      return false;
+    }
+    setSession(sessionData.session);
+
+    // Check if partner hasn't finished yet
+    if (!sessionData.session.guestId) {
+      setWaitingForPartner(true);
+      setLoading(false);
+      return true; // keep polling
+    }
+    setWaitingForPartner(false);
+
+    // Get matches
+    const matchRes = await fetch('/api/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'matches',
+        sessionId: sessionData.session.id,
+        hostId: sessionData.session.hostId,
+        guestId: sessionData.session.guestId || userId,
+      }),
+    });
+    const matchData = await matchRes.json();
+    setMatches(matchData.matches || []);
+
+    // Mark session completed for install prompt gating
+    localStorage.setItem('ct-sessions-completed', 'true');
+
+    // Show confetti if there are mutual matches (only once)
+    const mutualMatches = (matchData.matches || []).filter((m: Match) => m.bothLiked);
+    if (mutualMatches.length > 0 && !confettiShownRef.current) {
+      confettiShownRef.current = true;
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 4000);
+    }
+
+    setLoading(false);
+    return false; // stop polling
+  }, [code]);
 
   useEffect(() => {
-    async function load() {
-      const userId = getUserId();
-      // Get session
-      const sessionRes = await fetch('/api/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get', code }),
-      });
-      const sessionData = await sessionRes.json();
-      if (!sessionData.session) {
-        setLoading(false);
-        return;
+    let interval: NodeJS.Timeout | null = null;
+
+    loadResults().then((shouldPoll) => {
+      if (shouldPoll) {
+        interval = setInterval(async () => {
+          const keepPolling = await loadResults();
+          if (!keepPolling && interval) {
+            clearInterval(interval);
+          }
+        }, 3000);
       }
-      setSession(sessionData.session);
+    });
 
-      // Get matches
-      const matchRes = await fetch('/api/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'matches',
-          sessionId: sessionData.session.id,
-          hostId: sessionData.session.hostId,
-          guestId: sessionData.session.guestId || userId,
-        }),
-      });
-      const matchData = await matchRes.json();
-      setMatches(matchData.matches || []);
-
-      // Show confetti if there are mutual matches
-      const mutualMatches = (matchData.matches || []).filter((m: Match) => m.bothLiked);
-      if (mutualMatches.length > 0) {
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 4000);
-      }
-
-      setLoading(false);
-    }
-    load();
-  }, [code]);
+    return () => { if (interval) clearInterval(interval); };
+  }, [loadResults]);
 
   if (loading) {
     return (
@@ -89,7 +118,7 @@ export default function ResultsPage() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-8">
+      <div className="flex-1 overflow-y-auto px-4 pb-8 pb-safe">
         {/* Top Match Hero */}
         {topMatch ? (
           <div className="mb-8 text-center">

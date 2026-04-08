@@ -8,7 +8,7 @@
   --ct-secondary: #ff6b6b;
   --ct-accent: #ffd93d;
   --ct-text: #f0f0f0;
-  --ct-text-dim: #8888aa;
+  --ct-text-dim: #9999bb;
   --ct-card: #222240;
   --ct-border: #333355;
 }
@@ -23,8 +23,8 @@
   --color-card: var(--ct-card);
   --color-dim: var(--ct-text-dim);
   --color-border: var(--ct-border);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Cascadia Code", Menlo, Consolas, monospace;
 }
 
 * {
@@ -78,6 +78,14 @@ body {
 
 .confetti {
   animation: confetti-fall 3s ease-in forwards;
+  will-change: transform, opacity;
+}
+
+/* Safe area insets for notch/home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 /* Smooth page transitions */

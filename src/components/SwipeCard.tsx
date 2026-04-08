@@ -6,10 +6,11 @@ import { Star, MapPin, Clock } from 'lucide-react';
 
 interface SwipeCardProps {
   restaurant: Restaurant;
+  swipeDirection?: string | null;
   onSwipe?: (direction: string) => void;
 }
 
-export default function SwipeCard({ restaurant }: SwipeCardProps) {
+export default function SwipeCard({ restaurant, swipeDirection }: SwipeCardProps) {
   return (
     <div className="absolute inset-0 rounded-2xl overflow-hidden bg-[var(--ct-card)] shadow-2xl swipe-card">
       {/* Restaurant Photo */}
@@ -25,10 +26,10 @@ export default function SwipeCard({ restaurant }: SwipeCardProps) {
         <div className="card-gradient absolute inset-0" />
 
         {/* Like/Nope overlays */}
-        <div className="absolute top-8 left-6 border-4 border-[var(--ct-primary)] rounded-xl px-4 py-2 rotate-[-20deg] opacity-0 transition-opacity like-stamp">
+        <div className={`absolute top-8 left-6 border-4 border-[var(--ct-primary)] rounded-xl px-4 py-2 rotate-[-20deg] transition-opacity duration-200 like-stamp ${swipeDirection === 'right' ? 'opacity-100' : 'opacity-0'}`}>
           <span className="text-[var(--ct-primary)] text-3xl font-black tracking-wider">YUM!</span>
         </div>
-        <div className="absolute top-8 right-6 border-4 border-[var(--ct-secondary)] rounded-xl px-4 py-2 rotate-[20deg] opacity-0 transition-opacity nope-stamp">
+        <div className={`absolute top-8 right-6 border-4 border-[var(--ct-secondary)] rounded-xl px-4 py-2 rotate-[20deg] transition-opacity duration-200 nope-stamp ${swipeDirection === 'left' ? 'opacity-100' : 'opacity-0'}`}>
           <span className="text-[var(--ct-secondary)] text-3xl font-black tracking-wider">NAH</span>
         </div>
 

@@ -175,7 +175,8 @@ export default function Home() {
 
           <button
             onClick={() => { setMode('home'); setError(''); setJoinCode(''); }}
-            className="w-full py-3 text-[var(--ct-text-dim)] text-sm hover:text-[var(--ct-text)]"
+            className="w-full min-h-[44px] py-3 text-[var(--ct-text-dim)] text-sm hover:text-[var(--ct-text)]
+                       active:bg-[var(--ct-surface)] rounded-xl transition-colors"
           >
             Back
           </button>
